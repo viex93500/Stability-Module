@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stability v12 — Manager Module (Mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bleu-nuit: #24226a;
+  --bleu-moyen: #323c8e;
+  --bleu-clair: #d4def2;
+  --orange: #f55b41;
+  --vert: #91c461;
+  --jaune: #fdc400;
+  --teal: #47bfd9;
+  --violet: #9c7dcc;
+  --bg: #f7f8fc;
+  --bg-card: #ffffff;
+  --text: #1a1a3a;
+  --text-soft: #6b7099;
+  --border: #e6e9f5;
+  --shadow-sm: 0 2px 8px rgba(36, 34, 106, 0.06);
+  --shadow-md: 0 8px 24px rgba(36, 34, 106, 0.10);
+  --shadow-lg: 0 20px 60px rgba(36, 34, 106, 0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 400;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============ APP LAYOUT ============ */
+.app {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 100vh;
+}
+
+/* ============ SIDEBAR ============ */
+.sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+  border-right: 1px solid var(--border);
+  padding: 28px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.sidebar-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.brand-mark {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-moyen));
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.brand-text {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.module-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bleu-nuit);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.module-sub {
+  font-size: 12px;
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+.progress-wrap {
+  margin-top: 14px;
+  background: var(--bleu-clair);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), #ff7a5c);
+  border-radius: 999px;
+  width: 0%;
+  transition: width .5s ease;
+}
+
+.progress-label {
+  font-size: 11px;
+  color: var(--text-soft);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* Sidebar items */
+.sidebar-section-title {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  font-weight: 600;
+  margin: 12px 8px 8px;
+}
+
+.nav-list { list-style: none; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .2s ease;
+  margin-bottom: 3px;
+  position: relative;
+}
+
+.nav-item:hover { background: var(--bleu-clair); }
+
+.nav-item.active {
+  background: linear-gradient(90deg, var(--bleu-clair), transparent);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--orange);
+}
+
+.nav-item.locked { opacity: .45; cursor: not-allowed; }
+.nav-item.locked:hover { background: transparent; }
+
+.nav-check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  transition: all .3s ease;
+}
+
+.nav-item.completed .nav-check {
+  background: var(--vert);
+  border-color: var(--vert);
+}
+
+.nav-item.completed .nav-check::after {
+  content: '';
+  width: 6px; height: 10px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.nav-item.active:not(.completed) .nav-check {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 4px rgba(245, 91, 65, 0.12);
+}
+
+.nav-content { flex: 1; min-width: 0; }
+
+.nav-num {
+  font-size: 10px;
+  color: var(--text-soft);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.nav-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item.active .nav-title { font-weight: 600; color: var(--bleu-nuit); }
+
+.nav-icon {
+  width: 14px; height: 14px;
+  color: var(--text-soft);
+  flex-shrink: 0;
+}
+
+/* Quiz nav item special */
+.nav-item.quiz {
+  margin-top: 6px;
+  background: linear-gradient(135deg, rgba(36, 34, 106, 0.04), rgba(245, 91, 65, 0.04));
+  border: 1px dashed var(--border);
+}
+
+.nav-item.quiz.active {
+  background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-moyen));
+}
+
+.nav-item.quiz.active .nav-num,
+.nav-item.quiz.active .nav-title { color: #fff; }
+
+.nav-item.quiz.active .nav-check { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); }
+
+/* Lang selector compact (sidebar bottom) */
+.lang-selector-compact {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.lang-change-btn {
+  width: 100%;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: all .15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-change-btn:hover {
+  border-color: var(--bleu-moyen);
+  color: var(--bleu-nuit);
+  background: var(--bleu-clair);
+}
+
+/* ============ LANGUAGE SPLASH ============ */
+.lang-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(135deg, #ffffff 0%, #f7f8fc 50%, #eef0fa 100%);
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+  animation: fadeIn .4s ease;
+}
+
+.lang-splash::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(245, 91, 65, 0.12), transparent 70%);
+  pointer-events: none;
+}
+
+.lang-splash::after {
+  content: '';
+  position: absolute;
+  bottom: -200px; left: -200px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(36, 34, 106, 0.10), transparent 70%);
+  pointer-events: none;
+}
+
+.lang-splash.fade-out { animation: fadeOut .4s ease forwards; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+
+.lang-splash-inner {
+  max-width: 720px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.lang-splash-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 22px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.lang-splash-title {
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--bleu-nuit);
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, var(--bleu-nuit), var(--bleu-moyen));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.lang-splash-sub {
+  font-size: 16px;
+  color: var(--text-soft);
+  font-weight: 500;
+  margin-bottom: 48px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.lang-splash-question {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 32px;
+  opacity: .8;
+}
+
+.lang-splash-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.lang-card {
+  font-family: inherit;
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 16px;
+  cursor: pointer;
+  transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.lang-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--orange), var(--bleu-moyen));
+  opacity: 0;
+  transition: opacity .25s ease;
+  z-index: 0;
+}
+
+.lang-card > * { position: relative; z-index: 1; }
+
+.lang-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--orange);
+  box-shadow: 0 12px 28px rgba(245, 91, 65, 0.20);
+}
+
+.lang-card-flag {
+  font-size: 36px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
+}
+
+.lang-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--bleu-nuit);
+}
+
+.lang-card-code {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text-soft);
+}
+
+.lang-splash-note {
+  font-size: 12px;
+  color: var(--text-soft);
+  opacity: .8;
+}
+
+@media (max-width: 600px) {
+  .lang-splash-title { font-size: 40px; }
+  .lang-splash-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ============ MAIN ============ */
+.main {
+  padding: 40px 56px 80px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-soft);
+  font-weight: 500;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.crumb-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--orange); }
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--bleu-nuit);
+  line-height: 1.2;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.page-sub {
+  font-size: 14px;
+  color: var(--text-soft);
+  margin-bottom: 32px;
+}
+
+/* ============ VIDEO VIEW ============ */
+.video-frame {
+  background: #1a1a2e;
+  border-radius: 16px;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+}
+
+.video-placeholder {
+  width: 100%; height: 100%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d2d5a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.video-placeholder::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(245, 91, 65, 0.2), transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(71, 191, 217, 0.15), transparent 50%);
+}
+
+.play-icon {
+  width: 80px; height: 80px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all .3s ease;
+  position: relative;
+}
+
+.play-icon:hover { transform: scale(1.08); background: rgba(255,255,255,0.25); }
+.play-icon::after {
+  content: '';
+  width: 0; height: 0;
+  border-left: 18px solid #fff;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  margin-left: 5px;
+}
+
+.video-info {
+  position: absolute;
+  bottom: 20px; left: 24px;
+  color: #fff;
+  z-index: 2;
+}
+.video-info-tag { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: .7; margin-bottom: 4px; }
+.video-info-title { font-size: 18px; font-weight: 600; }
+
+.video-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--orange);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(245, 91, 65, 0.35);
+}
+
+.btn-primary:hover {
+  background: #e54e35;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(245, 91, 65, 0.45);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover { color: var(--bleu-nuit); border-color: var(--bleu-moyen); }
+
+.btn-arrow::after {
+  content: '→';
+  font-size: 18px;
+  transition: transform .2s ease;
+}
+.btn-arrow:hover::after { transform: translateX(3px); }
+
+/* ============ CONFIRMATION SCREEN ============ */
+.confirm-screen {
+  display: none;
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.confirm-ring {
+  width: 120px; height: 120px;
+  margin: 0 auto 28px;
+  position: relative;
+}
+
+.confirm-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+.confirm-ring circle {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.ring-bg { stroke: var(--bleu-clair); }
+.ring-fg {
+  stroke: var(--vert);
+  stroke-dasharray: 339.3;
+  stroke-dashoffset: 339.3;
+  transition: stroke-dashoffset 1s ease;
+}
+
+.confirm-screen.visible .ring-fg { stroke-dashoffset: 0; }
+
+.ring-check {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity .4s ease .8s;
+}
+.confirm-screen.visible .ring-check { opacity: 1; }
+
+.ring-check::after {
+  content: '';
+  width: 30px; height: 50px;
+  border-right: 5px solid var(--vert);
+  border-bottom: 5px solid var(--vert);
+  transform: rotate(45deg) translateY(-5px);
+}
+
+.confirm-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bleu-nuit);
+  margin-bottom: 10px;
+}
+
+.confirm-text {
+  color: var(--text-soft);
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ============ QUIZ ============ */
+.quiz-intro {
+  background: linear-gradient(135deg, var(--bleu-nuit) 0%, var(--bleu-moyen) 100%);
+  color: #fff;
+  border-radius: 20px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.quiz-intro::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(245, 91, 65, 0.25), transparent 70%);
+}
+
+.quiz-intro::after {
+  content: '';
+  position: absolute;
+  bottom: -30%; left: -10%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(71, 191, 217, 0.2), transparent 70%);
+}
+
+.quiz-intro-content { position: relative; z-index: 1; }
+
+.quiz-tag {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.15);
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.quiz-intro h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.quiz-intro p { opacity: .85; margin-bottom: 24px; max-width: 500px; }
+
+.quiz-stats {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.quiz-stat-num { font-size: 28px; font-weight: 700; color: var(--orange); }
+.quiz-stat-label { font-size: 11px; opacity: .7; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Quiz question card */
+.quiz-card {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 36px;
+  box-shadow: var(--shadow-md);
+  display: none;
+}
+
+.quiz-card.visible { display: block; }
+
+.quiz-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.quiz-progress-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-soft);
+  letter-spacing: 0.5px;
+}
+
+.quiz-progress-track {
+  flex: 1;
+  height: 4px;
+  background: var(--bleu-clair);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.quiz-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bleu-nuit), var(--orange));
+  transition: width .4s ease;
+}
+
+.quiz-question {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--bleu-nuit);
+  line-height: 1.4;
+  margin-bottom: 24px;
+}
+
+.quiz-type-hint {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--orange);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Term EN preserved (yellow highlight in master, here just keyword styling) */
+.term-en {
+  font-family: 'Poppins', monospace;
+  background: rgba(253, 196, 0, 0.18);
+  color: var(--bleu-nuit);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.quiz-options { display: flex; flex-direction: column; gap: 10px; }
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .2s ease;
+  background: #fff;
+  user-select: none;
+}
+
+.quiz-option:hover {
+  border-color: var(--bleu-moyen);
+  background: var(--bleu-clair);
+}
+
+.quiz-option.selected {
+  border-color: var(--orange);
+  background: rgba(245, 91, 65, 0.06);
+}
+
+.quiz-option-mark {
+  width: 22px; height: 22px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  transition: all .2s ease;
+}
+
+.quiz-option[data-multi="true"] .quiz-option-mark { border-radius: 5px; }
+
+.quiz-option.selected .quiz-option-mark {
+  border-color: var(--orange);
+  background: var(--orange);
+}
+
+.quiz-option.selected .quiz-option-mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.quiz-option.selected .quiz-option-mark::before {
+  content: '';
+  width: 6px; height: 10px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  position: absolute;
+  top: 3px; left: 6px;
+  transform: rotate(45deg);
+}
+
+.quiz-option-text { font-size: 14px; flex: 1; line-height: 1.4; }
+
+/* Drag and drop Q3 */
+.quiz-dnd { display: flex; flex-direction: column; gap: 8px; }
+
+.dnd-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: grab;
+  transition: all .15s ease;
+  user-select: none;
+}
+
+.dnd-item:hover {
+  border-color: var(--bleu-moyen);
+  box-shadow: var(--shadow-sm);
+}
+
+.dnd-item.dragging {
+  opacity: .5;
+  cursor: grabbing;
+}
+
+.dnd-item.drag-over {
+  border-color: var(--orange);
+  border-style: dashed;
+  background: rgba(245, 91, 65, 0.05);
+}
+
+.dnd-handle {
+  color: var(--text-soft);
+  font-size: 14px;
+  cursor: grab;
+}
+
+.dnd-num {
+  width: 28px; height: 28px;
+  background: var(--bleu-clair);
+  color: var(--bleu-nuit);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.dnd-text { flex: 1; font-size: 14px; font-weight: 500; }
+
+/* Quiz nav */
+.quiz-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* Quiz result */
+.quiz-result {
+  background: var(--bg-card);
+  border-radius: 20px;
+  padding: 50px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  display: none;
+}
+
+.quiz-result.visible { display: block; }
+
+.result-score {
+  font-size: 64px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--bleu-nuit), var(--orange));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.result-label { font-size: 14px; color: var(--text-soft); margin-bottom: 24px; }
+
+.result-status {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.result-status.success { background: rgba(145, 196, 97, 0.15); color: #5a8a3a; }
+.result-status.fail { background: rgba(253, 196, 0, 0.18); color: #8a6a00; }
+
+.result-title { font-size: 24px; font-weight: 700; color: var(--bleu-nuit); margin-bottom: 10px; }
+.result-text { color: var(--text-soft); margin-bottom: 28px; }
+
+/* ============ MOBILE ============ */
+.burger {
+  display: none;
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--border);
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.burger span {
+  width: 18px; height: 2px;
+  background: var(--bleu-nuit);
+  border-radius: 2px;
+  transition: all .2s ease;
+}
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 320px;
+    transform: translateX(-100%);
+    transition: transform .3s ease;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .burger { display: flex; }
+  .main { padding: 70px 20px 60px; }
+  .page-title { font-size: 24px; }
+  .quiz-card, .quiz-intro { padding: 24px; }
+}
+
+/* RTL preview */
+body.rtl { direction: rtl; }
+body.rtl .sidebar { border-right: none; border-left: 1px solid var(--border); }
+body.rtl .nav-item.active::before { left: auto; right: 0; }
+body.rtl .btn-arrow::after { content: '←'; }
+
+/* Hidden helper */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ===== LANGUAGE SPLASH SCREEN ===== -->
+<div id="langSplash" class="lang-splash">
+  <div class="lang-splash-inner">
+    <div class="lang-splash-brand">
+      <div class="brand-mark" style="width: 48px; height: 48px; font-size: 18px;">S</div>
+      <div>
+        <div class="brand-text" style="font-size: 11px;">Servier · Digital Learning</div>
+        <div style="font-size: 13px; color: var(--text-soft); margin-top: 2px;">Industrial Direction</div>
+      </div>
+    </div>
+    <h1 class="lang-splash-title">Stability v12</h1>
+    <p class="lang-splash-sub">Manager pathway</p>
+    <div class="lang-splash-question">
+      <span>Choose your language</span>
+      <span style="color: var(--text-soft);">·</span>
+      <span>Choisissez votre langue</span>
+      <span style="color: var(--text-soft);">·</span>
+      <span>اختر لغتك</span>
+    </div>
+    <div class="lang-splash-grid">
+      <button class="lang-card" data-lang="fr" onclick="selectLanguage('fr')">
+        <div class="lang-card-flag">🇫🇷</div>
+        <div class="lang-card-name">Français</div>
+        <div class="lang-card-code">FR</div>
+      </button>
+      <button class="lang-card" data-lang="en" onclick="selectLanguage('en')">
+        <div class="lang-card-flag">🇬🇧</div>
+        <div class="lang-card-name">English</div>
+        <div class="lang-card-code">EN</div>
+      </button>
+      <button class="lang-card" data-lang="es" onclick="selectLanguage('es')">
+        <div class="lang-card-flag">🇪🇸</div>
+        <div class="lang-card-name">Español</div>
+        <div class="lang-card-code">ES</div>
+      </button>
+      <button class="lang-card" data-lang="pl" onclick="selectLanguage('pl')">
+        <div class="lang-card-flag">🇵🇱</div>
+        <div class="lang-card-name">Polski</div>
+        <div class="lang-card-code">PL</div>
+      </button>
+      <button class="lang-card" data-lang="cn" onclick="selectLanguage('cn')">
+        <div class="lang-card-flag">🇨🇳</div>
+        <div class="lang-card-name">中文</div>
+        <div class="lang-card-code">CN</div>
+      </button>
+      <button class="lang-card" data-lang="ar" onclick="selectLanguage('ar')">
+        <div class="lang-card-flag">🇸🇦</div>
+        <div class="lang-card-name">العربية</div>
+        <div class="lang-card-code">AR</div>
+      </button>
+    </div>
+    <p class="lang-splash-note">You can change the language at any time from the sidebar.</p>
+  </div>
+</div>
+
+<button class="burger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</button>
+
+<div class="app" id="appWrapper" style="display: none;">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div>
+          <div class="brand-text">Servier</div>
+          <div id="brandSubtitle" style="font-size: 11px; color: var(--text-soft);">Digital Learning</div>
+        </div>
+      </div>
+      <div class="module-title" id="moduleTitle">Module Stability v12</div>
+      <div class="module-sub" id="moduleSub">Parcours Manager · Industrie</div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-label" id="progressLabel">0 / 9 complétés</div>
+    </div>
+
+    <div class="sidebar-section-title" id="navSectionTitle">Parcours d'apprentissage</div>
+    <ul class="nav-list" id="navList">
+      <!-- populated by JS -->
+    </ul>
+
+    <div class="lang-selector-compact">
+      <button class="lang-change-btn" onclick="reopenLanguageSplash()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span id="currentLangLabel">Français</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+    <!-- VIDEO VIEW -->
+    <section id="videoView">
+      <div class="crumb">
+        <span id="crumbModule">MODULE</span>
+        <span class="crumb-dot"></span>
+        <span id="crumbStep">Étape 1 / 9</span>
+      </div>
+      <h1 class="page-title" id="videoTitle">Introduction Stability v12</h1>
+      <p class="page-sub" id="videoDesc">Découvrez les principes fondamentaux du module de gestion des études de stabilité.</p>
+
+      <div class="video-frame">
+        <iframe id="videoFrame" 
+                width="100%" height="100%" 
+                frameborder="0" 
+                scrolling="no"
+                allowfullscreen
+                allow="autoplay; encrypted-media; fullscreen"
+                title="Stability v12 video"
+                style="border-radius: 16px;"></iframe>
+      </div>
+
+      <div class="video-actions">
+        <button class="btn btn-ghost" id="prevStepBtn" onclick="prevStep()">← Étape précédente</button>
+        <button class="btn btn-primary btn-arrow" id="watchedBtn" onclick="goToConfirm()">J'ai vu cette vidéo</button>
+      </div>
+    </section>
+
+    <!-- CONFIRM SCREEN -->
+    <section id="confirmView" class="hidden">
+      <div class="confirm-screen visible" id="confirmScreen">
+        <div class="confirm-ring">
+          <svg viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+            <circle class="ring-fg" cx="60" cy="60" r="54"></circle>
+          </svg>
+          <div class="ring-check"></div>
+        </div>
+        <div class="confirm-title" id="confirmTitle">Vidéo terminée !</div>
+        <div class="confirm-text" id="confirmText">Excellent. Vous pouvez maintenant passer à l'étape suivante de votre parcours.</div>
+        <div class="confirm-actions">
+          <button class="btn btn-ghost" id="rewatchBtn" onclick="rewatchVideo()">Revoir la vidéo</button>
+          <button class="btn btn-primary btn-arrow" id="nextStepBtn" onclick="nextStep()">Étape suivante</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ INTRO -->
+    <section id="quizIntroView" class="hidden">
+      <div class="crumb">
+        <span id="crumbModule2">MODULE</span>
+        <span class="crumb-dot"></span>
+        <span id="quizCrumb">Quiz final</span>
+      </div>
+      <div class="quiz-intro">
+        <div class="quiz-intro-content">
+          <span class="quiz-tag" id="quizTag">Quiz · Manager</span>
+          <h2 id="quizIntroTitle">Validez vos connaissances</h2>
+          <p id="quizIntroText">Ce quiz comporte 20 questions sur la gestion des études de stabilité dans le module <span class="term-en">Stability v12</span>. Vous pouvez retenter autant que nécessaire.</p>
+          <div class="quiz-stats">
+            <div>
+              <div class="quiz-stat-num">20</div>
+              <div class="quiz-stat-label" id="statQuestions">Questions</div>
+            </div>
+            <div>
+              <div class="quiz-stat-num">80%</div>
+              <div class="quiz-stat-label" id="statThreshold">Seuil de réussite</div>
+            </div>
+            <div>
+              <div class="quiz-stat-num">∞</div>
+              <div class="quiz-stat-label" id="statAttempts">Tentatives</div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-arrow" id="startQuizBtn" onclick="startQuiz()" style="background: var(--orange);">Commencer le quiz</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ QUESTION -->
+    <section id="quizView" class="hidden">
+      <div class="quiz-card visible" id="quizCard">
+        <div class="quiz-progress">
+          <span class="quiz-progress-text" id="quizCounter">Question 1 / 4</span>
+          <div class="quiz-progress-track">
+            <div class="quiz-progress-fill" id="quizProgressFill" style="width: 25%"></div>
+          </div>
+        </div>
+        <div class="quiz-type-hint" id="quizTypeHint">Choix unique</div>
+        <div class="quiz-question" id="quizQuestion"></div>
+        <div id="quizContent"></div>
+        <div class="quiz-nav">
+          <button class="btn btn-ghost" id="quizPrevBtn" onclick="quizPrev()">← Précédent</button>
+          <button class="btn btn-primary btn-arrow" id="quizNextBtn" onclick="quizNext()">Suivant</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ RESULT -->
+    <section id="resultView" class="hidden">
+      <div class="quiz-result visible">
+        <div class="result-score" id="resultScore">0%</div>
+        <div class="result-label" id="resultLabel">0 / 4 correct</div>
+        <div class="result-status" id="resultStatus">—</div>
+        <div class="result-title" id="resultTitle">—</div>
+        <div class="result-text" id="resultText">—</div>
+        <div class="confirm-actions">
+          <button class="btn btn-ghost" id="backHomeBtn" onclick="goBackHome()">Retour au module</button>
+          <button class="btn btn-primary" id="retryBtn" onclick="retryQuiz()">Recommencer le quiz</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ===== I18N — Translations for all 6 languages =====
+const I18N = {
+  fr: {
+    direction: 'ltr',
+    brand_subtitle: 'Digital Learning',
+    module_title: 'Module Stability v12',
+    module_sub: 'Parcours Manager · Industrie',
+    progress_label: '{n} / {total} complétés',
+    nav_section: 'Parcours d\'apprentissage',
+    nav_video_label: 'VIDÉO',
+    nav_quiz_label: 'QUIZ FINAL',
+    nav_quiz_locked: 'QUIZ FINAL · VERROUILLÉ',
+    nav_quiz_meta: '20 questions · 80% requis',
+    nav_quiz_meta_locked: 'Visionnez les {n} vidéos restantes',
+    crumb_module: 'MODULE',
+    step_label: 'Étape {n} / {total}',
+    btn_watched: 'J\'ai vu cette vidéo',
+    btn_prev: '← Étape précédente',
+    btn_next: 'Étape suivante',
+    btn_rewatch: 'Revoir la vidéo',
+    btn_start_quiz: 'Commencer le quiz',
+    btn_quiz_prev: '← Précédent',
+    btn_quiz_next: 'Suivant',
+    btn_finish_quiz: 'Terminer le quiz',
+    btn_retry: 'Recommencer le quiz',
+    btn_back_home: 'Retour au module',
+    confirm_title: 'Vidéo terminée !',
+    confirm_text: 'Excellent. Vous pouvez maintenant passer à l\'étape suivante de votre parcours.',
+    quiz_crumb: 'Quiz final',
+    quiz_tag: 'Quiz · Manager',
+    quiz_intro_title: 'Validez vos connaissances',
+    quiz_intro_text: 'Ce quiz comporte 20 questions sur la gestion des études de stabilité dans le module <span class="term-en">Stability v12</span>. Vous pouvez retenter autant que nécessaire.',
+    stat_questions: 'Questions',
+    stat_threshold: 'Seuil de réussite',
+    stat_attempts: 'Tentatives',
+    quiz_counter: 'Question {n} / {total}',
+    type_single: 'Choix unique',
+    type_multi: 'Plusieurs réponses possibles',
+    type_order: 'Glisser pour classer',
+    result_correct: '{n} / {total} bonnes réponses',
+    result_pass_status: 'Réussi',
+    result_fail_status: 'Non validé',
+    result_pass_title: 'Félicitations !',
+    result_pass_text: 'Vous avez validé le module. Votre progression sera enregistrée dans CSOD.',
+    result_fail_title: 'Pas tout à fait',
+    result_fail_text: 'Vous n\'avez pas atteint le seuil de 80%. Recommencez le quiz pour valider le module.',
+    quiz_locked_alert: '🔒 Quiz verrouillé\n\nVous devez d\'abord visionner {n} vidéo(s) supplémentaire(s) avant de pouvoir accéder au quiz final.\n\nCliquez sur "J\'ai vu cette vidéo" après chaque visionnage.'
+  },
+  en: {
+    direction: 'ltr',
+    brand_subtitle: 'Digital Learning',
+    module_title: 'Stability v12 Module',
+    module_sub: 'Manager pathway · Industrial',
+    progress_label: '{n} / {total} completed',
+    nav_section: 'Learning path',
+    nav_video_label: 'VIDEO',
+    nav_quiz_label: 'FINAL QUIZ',
+    nav_quiz_locked: 'FINAL QUIZ · LOCKED',
+    nav_quiz_meta: '20 questions · 80% required',
+    nav_quiz_meta_locked: 'Watch the {n} remaining videos',
+    crumb_module: 'MODULE',
+    step_label: 'Step {n} / {total}',
+    btn_watched: 'I have watched this video',
+    btn_prev: '← Previous step',
+    btn_next: 'Next step',
+    btn_rewatch: 'Watch again',
+    btn_start_quiz: 'Start quiz',
+    btn_quiz_prev: '← Previous',
+    btn_quiz_next: 'Next',
+    btn_finish_quiz: 'Finish quiz',
+    btn_retry: 'Retry quiz',
+    btn_back_home: 'Back to module',
+    confirm_title: 'Video completed!',
+    confirm_text: 'Excellent. You can now move on to the next step of your pathway.',
+    quiz_crumb: 'Final quiz',
+    quiz_tag: 'Quiz · Manager',
+    quiz_intro_title: 'Validate your knowledge',
+    quiz_intro_text: 'This quiz contains 20 questions on study management in the <span class="term-en">Stability v12</span> module. You can retry as many times as needed.',
+    stat_questions: 'Questions',
+    stat_threshold: 'Pass threshold',
+    stat_attempts: 'Attempts',
+    quiz_counter: 'Question {n} / {total}',
+    type_single: 'Single choice',
+    type_multi: 'Multiple choice',
+    type_order: 'Drag to order',
+    result_correct: '{n} / {total} correct answers',
+    result_pass_status: 'Passed',
+    result_fail_status: 'Not passed',
+    result_pass_title: 'Congratulations!',
+    result_pass_text: 'You have completed the module. Your progress will be saved in CSOD.',
+    result_fail_title: 'Not quite there',
+    result_fail_text: 'You did not reach the 80% threshold. Retry the quiz to complete the module.',
+    quiz_locked_alert: '🔒 Quiz locked\n\nYou must first watch {n} more video(s) before you can access the final quiz.\n\nClick "I have watched this video" after each viewing.'
+  },
+  es: {
+    direction: 'ltr',
+    brand_subtitle: 'Digital Learning',
+    module_title: 'Módulo Stability v12',
+    module_sub: 'Itinerario Manager · Industrial',
+    progress_label: '{n} / {total} completados',
+    nav_section: 'Itinerario de aprendizaje',
+    nav_video_label: 'VÍDEO',
+    nav_quiz_label: 'EVALUACIÓN FINAL',
+    nav_quiz_locked: 'EVALUACIÓN FINAL · BLOQUEADO',
+    nav_quiz_meta: '20 preguntas · 80% requerido',
+    nav_quiz_meta_locked: 'Vea los {n} vídeos restantes',
+    crumb_module: 'MÓDULO',
+    step_label: 'Paso {n} / {total}',
+    btn_watched: 'He visto este vídeo',
+    btn_prev: '← Paso anterior',
+    btn_next: 'Paso siguiente',
+    btn_rewatch: 'Volver a ver',
+    btn_start_quiz: 'Comenzar el cuestionario',
+    btn_quiz_prev: '← Anterior',
+    btn_quiz_next: 'Siguiente',
+    btn_finish_quiz: 'Finalizar cuestionario',
+    btn_retry: 'Reintentar',
+    btn_back_home: 'Volver al módulo',
+    confirm_title: '¡Vídeo completado!',
+    confirm_text: 'Excelente. Ahora puede pasar al siguiente paso de su itinerario.',
+    quiz_crumb: 'Evaluación final',
+    quiz_tag: 'Quiz · Manager',
+    quiz_intro_title: 'Valide sus conocimientos',
+    quiz_intro_text: 'Este cuestionario contiene 20 preguntas sobre la gestión de estudios en el módulo <span class="term-en">Stability v12</span>. Puede reintentarlo tantas veces como sea necesario.',
+    stat_questions: 'Preguntas',
+    stat_threshold: 'Umbral de aprobación',
+    stat_attempts: 'Intentos',
+    quiz_counter: 'Pregunta {n} / {total}',
+    type_single: 'Opción única',
+    type_multi: 'Opción múltiple',
+    type_order: 'Arrastrar para ordenar',
+    result_correct: '{n} / {total} respuestas correctas',
+    result_pass_status: 'Aprobado',
+    result_fail_status: 'No aprobado',
+    result_pass_title: '¡Felicidades!',
+    result_pass_text: 'Ha completado el módulo. Su progreso se guardará en CSOD.',
+    result_fail_title: 'Casi lo logra',
+    result_fail_text: 'No alcanzó el umbral del 80%. Reintente el cuestionario para completar el módulo.',
+    quiz_locked_alert: '🔒 Cuestionario bloqueado\n\nDebe ver primero {n} vídeo(s) más antes de acceder al cuestionario final.\n\nHaga clic en "He visto este vídeo" tras cada visionado.'
+  },
+  pl: {
+    direction: 'ltr',
+    brand_subtitle: 'Digital Learning',
+    module_title: 'Moduł Stability v12',
+    module_sub: 'Ścieżka Manager · Przemysł',
+    progress_label: '{n} / {total} ukończonych',
+    nav_section: 'Ścieżka nauki',
+    nav_video_label: 'WIDEO',
+    nav_quiz_label: 'QUIZ KOŃCOWY',
+    nav_quiz_locked: 'QUIZ KOŃCOWY · ZABLOKOWANY',
+    nav_quiz_meta: '20 pytań · wymagane 80%',
+    nav_quiz_meta_locked: 'Obejrzyj pozostałe {n} filmów',
+    crumb_module: 'MODUŁ',
+    step_label: 'Krok {n} / {total}',
+    btn_watched: 'Obejrzałem ten film',
+    btn_prev: '← Poprzedni krok',
+    btn_next: 'Następny krok',
+    btn_rewatch: 'Obejrzyj ponownie',
+    btn_start_quiz: 'Rozpocznij quiz',
+    btn_quiz_prev: '← Wstecz',
+    btn_quiz_next: 'Dalej',
+    btn_finish_quiz: 'Zakończ quiz',
+    btn_retry: 'Spróbuj ponownie',
+    btn_back_home: 'Powrót do modułu',
+    confirm_title: 'Film ukończony!',
+    confirm_text: 'Świetnie. Możesz teraz przejść do następnego kroku swojej ścieżki.',
+    quiz_crumb: 'Quiz końcowy',
+    quiz_tag: 'Quiz · Manager',
+    quiz_intro_title: 'Sprawdź swoją wiedzę',
+    quiz_intro_text: 'Quiz zawiera 20 pytań dotyczących zarządzania badaniami w module <span class="term-en">Stability v12</span>. Możesz spróbować dowolną liczbę razy.',
+    stat_questions: 'Pytań',
+    stat_threshold: 'Próg zaliczenia',
+    stat_attempts: 'Próby',
+    quiz_counter: 'Pytanie {n} / {total}',
+    type_single: 'Jednokrotny wybór',
+    type_multi: 'Wielokrotny wybór',
+    type_order: 'Przeciągnij, aby uporządkować',
+    result_correct: '{n} / {total} poprawnych odpowiedzi',
+    result_pass_status: 'Zaliczono',
+    result_fail_status: 'Niezaliczono',
+    result_pass_title: 'Gratulacje!',
+    result_pass_text: 'Ukończyłeś moduł. Twoje postępy zostaną zapisane w CSOD.',
+    result_fail_title: 'Prawie się udało',
+    result_fail_text: 'Nie osiągnąłeś progu 80%. Powtórz quiz, aby ukończyć moduł.',
+    quiz_locked_alert: '🔒 Quiz zablokowany\n\nMusisz najpierw obejrzeć {n} dodatkowy(ch) film(ów) przed uzyskaniem dostępu do quizu końcowego.\n\nKliknij "Obejrzałem ten film" po każdym obejrzeniu.'
+  },
+  cn: {
+    direction: 'ltr',
+    brand_subtitle: '数字学习',
+    module_title: 'Stability v12 模块',
+    module_sub: '管理者路径 · 工业',
+    progress_label: '已完成 {n} / {total}',
+    nav_section: '学习路径',
+    nav_video_label: '视频',
+    nav_quiz_label: '最终测验',
+    nav_quiz_locked: '最终测验 · 已锁定',
+    nav_quiz_meta: '20 题 · 需要 80%',
+    nav_quiz_meta_locked: '请观看剩余的 {n} 个视频',
+    crumb_module: '模块',
+    step_label: '步骤 {n} / {total}',
+    btn_watched: '我已观看此视频',
+    btn_prev: '← 上一步',
+    btn_next: '下一步',
+    btn_rewatch: '重新观看',
+    btn_start_quiz: '开始测验',
+    btn_quiz_prev: '← 上一题',
+    btn_quiz_next: '下一题',
+    btn_finish_quiz: '完成测验',
+    btn_retry: '重新开始',
+    btn_back_home: '返回模块',
+    confirm_title: '视频已完成！',
+    confirm_text: '太好了。您现在可以进入学习路径的下一步。',
+    quiz_crumb: '最终测验',
+    quiz_tag: '测验 · 管理者',
+    quiz_intro_title: '验证您的知识',
+    quiz_intro_text: '此测验包含 20 道关于 <span class="term-en">Stability v12</span> 模块研究管理的问题。您可以重试任意次数。',
+    stat_questions: '题目',
+    stat_threshold: '通过分数',
+    stat_attempts: '尝试次数',
+    quiz_counter: '第 {n} 题 / 共 {total} 题',
+    type_single: '单选',
+    type_multi: '多选',
+    type_order: '拖动排序',
+    result_correct: '{n} / {total} 正确答案',
+    result_pass_status: '通过',
+    result_fail_status: '未通过',
+    result_pass_title: '恭喜！',
+    result_pass_text: '您已完成模块。您的进度将保存在 CSOD 中。',
+    result_fail_title: '还差一点',
+    result_fail_text: '您未达到 80% 的通过分数。请重新进行测验以完成模块。',
+    quiz_locked_alert: '🔒 测验已锁定\n\n您必须先观看另外 {n} 个视频，然后才能进入最终测验。\n\n每次观看后请点击"我已观看此视频"。'
+  },
+  ar: {
+    direction: 'rtl',
+    brand_subtitle: 'التعلم الرقمي',
+    module_title: 'وحدة Stability v12',
+    module_sub: 'مسار المدير · صناعي',
+    progress_label: '{n} / {total} مكتمل',
+    nav_section: 'مسار التعلم',
+    nav_video_label: 'فيديو',
+    nav_quiz_label: 'الاختبار النهائي',
+    nav_quiz_locked: 'الاختبار النهائي · مقفل',
+    nav_quiz_meta: '20 سؤالاً · مطلوب 80%',
+    nav_quiz_meta_locked: 'شاهد {n} مقاطع فيديو متبقية',
+    crumb_module: 'الوحدة',
+    step_label: 'الخطوة {n} / {total}',
+    btn_watched: 'لقد شاهدت هذا الفيديو',
+    btn_prev: 'الخطوة السابقة →',
+    btn_next: 'الخطوة التالية',
+    btn_rewatch: 'شاهد مرة أخرى',
+    btn_start_quiz: 'ابدأ الاختبار',
+    btn_quiz_prev: 'السابق →',
+    btn_quiz_next: 'التالي',
+    btn_finish_quiz: 'إنهاء الاختبار',
+    btn_retry: 'إعادة المحاولة',
+    btn_back_home: 'العودة إلى الوحدة',
+    confirm_title: 'اكتمل الفيديو!',
+    confirm_text: 'ممتاز. يمكنك الآن الانتقال إلى الخطوة التالية من مسارك.',
+    quiz_crumb: 'الاختبار النهائي',
+    quiz_tag: 'اختبار · مدير',
+    quiz_intro_title: 'تحقق من معرفتك',
+    quiz_intro_text: 'يحتوي هذا الاختبار على 20 سؤالاً حول إدارة الدراسات في وحدة <span class="term-en">Stability v12</span>. يمكنك إعادة المحاولة بقدر ما تحتاج.',
+    stat_questions: 'الأسئلة',
+    stat_threshold: 'نسبة النجاح',
+    stat_attempts: 'المحاولات',
+    quiz_counter: 'السؤال {n} / {total}',
+    type_single: 'اختيار واحد',
+    type_multi: 'اختيار متعدد',
+    type_order: 'اسحب للترتيب',
+    result_correct: '{n} / {total} إجابات صحيحة',
+    result_pass_status: 'ناجح',
+    result_fail_status: 'غير مكتمل',
+    result_pass_title: 'تهانينا!',
+    result_pass_text: 'لقد أكملت الوحدة. سيتم حفظ تقدمك في CSOD.',
+    result_fail_title: 'لم تنجح بعد',
+    result_fail_text: 'لم تصل إلى نسبة 80%. أعد الاختبار لإكمال الوحدة.',
+    quiz_locked_alert: '🔒 الاختبار مقفل\n\nيجب عليك أولاً مشاهدة {n} فيديو(هات) إضافية قبل أن تتمكن من الوصول إلى الاختبار النهائي.\n\nانقر على "لقد شاهدت هذا الفيديو" بعد كل مشاهدة.'
+  }
+};
+
+// ===== VIDEOS METADATA per language (titles + descriptions + URLs) =====
+const VIDEOS_META = {
+  fr: [
+    { title: 'Introduction Stability v12', desc: 'Découvrez les principes fondamentaux du module.', tag: 'COMMON', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=e6211517-8982-41d7-ade9-b05283f2be69' },
+    { title: 'Création d\'une étude', desc: 'Apprenez à créer une étude de stabilité dans le LIMS.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=0e2eef5f-572b-4df1-a04a-99716806fbeb' },
+    { title: 'Start Study', desc: 'Lancez officiellement votre étude après création.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=1a8e108e-8a3c-4d1d-8e8d-a711543a76b8' },
+    { title: 'T0', desc: 'Gérez le point de départ T0 de votre étude.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=4f2c2a52-141b-45b4-98a5-1fad1b081ff5' },
+    { title: 'Picklist', desc: 'Comprenez et utilisez les picklists du module.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=dc142519-e183-4119-9e54-6e85f6baf534' },
+    { title: 'Ajout d\'un Timepoint', desc: 'Ajoutez un nouveau timepoint à une étude existante.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=6801d84b-e33b-4c19-9178-e8a1689c5f2e' },
+    { title: 'Move Location', desc: 'Déplacez vos samples d\'une chambre climatique à une autre.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=f26fdbdb-a2a9-4373-ae5d-65d071c46576' },
+    { title: 'Finaliser une étude', desc: 'Procédez à la finalisation propre de votre étude.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=1d9756aa-064d-4e4a-a702-1717c9e2bd92' }
+  ],
+  en: [
+    { title: 'Introduction to Stability v12', desc: 'Discover the fundamentals of the Stability v12 module.', tag: 'COMMON', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=97fc461e-a5e6-4aa4-adbe-48c1cf53fb07' },
+    { title: 'Creating a Study', desc: 'Learn how to create a new stability study.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=f1d89533-c14f-4fee-91ee-a712234bc54a' },
+    { title: 'Start Study', desc: 'Officially launch your study after creation.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=388afaf4-03bc-4875-8430-4d7ec909f872' },
+    { title: 'T0', desc: 'Manage the T0 starting point of your study.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=b485c162-8791-4725-bc65-aef3626b94da' },
+    { title: 'Picklist', desc: 'Understand and use picklists in your studies.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=aeb079ba-8dbf-40a6-b7a8-d064accfb741' },
+    { title: 'Adding a Timepoint', desc: 'Add a new time point to an existing study.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=68fbbcc0-47a7-43d0-9dd6-448af4647c21' },
+    { title: 'Move Location', desc: 'Move your samples between climatic chambers.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=d2049703-74fe-46ef-8f6d-2b5456e7490f' },
+    { title: 'Finalizing a Study', desc: 'Properly finalize your stability study.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=855f6f2d-b28d-4399-abf8-68249ef6f06b' }
+  ],
+  es: [
+    { title: 'Introducción a Stability v12', desc: 'Descubra los principios fundamentales del módulo.', tag: 'COMMON', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=b8174827-7e6d-43c3-9a08-cc8aaedd09f6' },
+    { title: 'Creación de un estudio', desc: 'Aprenda a crear un nuevo estudio de estabilidad.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=028899d3-f4fc-44c0-aa0a-a97aea01f906' },
+    { title: 'Start Study', desc: 'Lance oficialmente su estudio después de su creación.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=a6ff7a5a-df8d-4b83-a1a1-14a395343778' },
+    { title: 'T0', desc: 'Gestione el punto de partida T0 de su estudio.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=c7a215be-259e-45bc-9450-81139ea56127' },
+    { title: 'Picklist', desc: 'Comprenda y utilice las picklists en sus estudios.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=30b54da6-0b6d-42eb-a710-fc17386e2bd4' },
+    { title: 'Añadir un Timepoint', desc: 'Añada un nuevo time point a un estudio existente.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=a17f16f9-8fc6-4287-9fd3-61c2430fc908' },
+    { title: 'Move Location', desc: 'Mueva sus samples entre climatic chambers.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=175b4b88-cd56-4d32-93df-fdf195f0feee' },
+    { title: 'Finalizar un estudio', desc: 'Proceda con la finalización completa de su estudio.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=9198b74c-608d-4556-8f3c-a61808eb1ab4' }
+  ],
+  pl: [
+    { title: 'Wprowadzenie do Stability v12', desc: 'Poznaj podstawy modułu Stability v12.', tag: 'COMMON', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=5a4492e9-f462-47ee-85fb-6b3bb3919739' },
+    { title: 'Tworzenie badania', desc: 'Naucz się tworzyć nowe badanie stabilności.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=03d92274-7dc8-4b3f-8b58-434f2d62da14' },
+    { title: 'Start Study', desc: 'Oficjalnie uruchom swoje badanie po utworzeniu.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=c3f2df97-8b9e-473b-abe5-46e0918b84df' },
+    { title: 'T0', desc: 'Zarządzaj punktem startowym T0 Twojego badania.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=0d363d8d-bd32-4dec-a040-3c52601d14ec' },
+    { title: 'Picklist', desc: 'Zrozum i używaj picklists w swoich badaniach.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=5903cddf-c7c3-4398-9ef7-f621d90420fb' },
+    { title: 'Dodawanie Timepoint', desc: 'Dodaj nowy time point do istniejącego badania.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=2b8a21dd-ed9a-4685-8d4d-45a09eda90d6' },
+    { title: 'Move Location', desc: 'Przenoś samples między climatic chambers.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=9c22d57b-6fa9-4ba1-90f7-a9129d3d93ed' },
+    { title: 'Finalizacja badania', desc: 'Przeprowadź pełną finalizację swojego badania.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=492f4d68-cef7-4eec-af55-e3831b89ab1c' }
+  ],
+  cn: [
+    { title: 'Stability v12 简介', desc: '了解 Stability v12 模块的基本原理。', tag: 'COMMON', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=a31b2e81-5060-4d4d-8b1b-42f5935ea236' },
+    { title: '创建研究', desc: '学习如何创建新的稳定性研究。', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=6329392c-7cc8-413d-9869-a1b76a47fff0' },
+    { title: 'Start Study', desc: '在创建后正式启动您的研究。', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=5e4baa33-4d52-4daf-bb98-86e633daaf6e' },
+    { title: 'T0', desc: '管理研究的 T0 起点。', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=306ee08c-cc04-44d9-87ac-ba1fbd30200d' },
+    { title: 'Picklist', desc: '了解并使用研究中的 picklists。', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=b0816eb0-6da9-453d-b27e-3a9408fcc6a5' },
+    { title: '添加 Timepoint', desc: '向现有研究添加新的 time point。', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=fb96301f-a132-468b-91e9-66aa058db7f7' },
+    { title: 'Move Location', desc: '在 climatic chambers 之间移动 samples。', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=b86339dc-6c31-4da9-91a8-0f06f7170b1d' },
+    { title: '完成研究', desc: '正确完成您的稳定性研究。', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=31fe0468-04b7-4ff1-b2e0-1cbabe961f1e' }
+  ],
+  ar: [
+    { title: 'مقدمة إلى Stability v12', desc: 'اكتشف المبادئ الأساسية لوحدة Stability v12.', tag: 'COMMON', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=6a0bed80-afeb-47e3-b2bd-afa42217b07d' },
+    { title: 'إنشاء دراسة', desc: 'تعلم كيفية إنشاء دراسة استقرار جديدة.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=e07265fa-f7f2-4408-860f-de2961d30bee' },
+    { title: 'Start Study', desc: 'أطلق دراستك رسميًا بعد إنشائها.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=c1ab4902-2333-40c7-b50d-897c59b6391e' },
+    { title: 'T0', desc: 'إدارة نقطة البداية T0 لدراستك.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=5d10c11e-9deb-4551-8e61-82347df9a4bf' },
+    { title: 'Picklist', desc: 'افهم واستخدم picklists في دراساتك.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=85a76e5c-db98-4047-ab08-963f49bd0925' },
+    { title: 'إضافة Timepoint', desc: 'أضف time point جديدًا إلى دراسة موجودة.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=94e3203f-e548-4299-a580-f6f215b3a527' },
+    { title: 'Move Location', desc: 'انقل samples بين climatic chambers.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=3e1ddaa3-1fa8-4e8e-8e9f-dd866e6be1a7' },
+    { title: 'إنهاء دراسة', desc: 'أكمل دراستك بشكل صحيح.', tag: 'MGR', url: 'https://serviergroup.sharepoint.com/sites/DigitalLearning/_layouts/15/embed.aspx?UniqueId=54695393-554c-4725-aaa6-50c070219806' }
+  ]
+};
+
+// ===== QUIZ per language (4-question demo subset) =====
+const QUIZ_I18N = {
+  fr: [
+    { type: 'single', q: 'Quelle option est utilisée pour créer une étude ?',
+      options: [{t: '<span class="term-en">Create from scratch</span>', correct: false},{t: '<span class="term-en">Create from template</span>', correct: true}] },
+    { type: 'single', q: 'Quelles modifications devez-vous effectuer dans votre étude lors d\'une création par <span class="term-en">template</span> ?',
+      options: [{t: 'L\'article', correct: false},{t: 'Le <span class="term-en">Test group</span> dans les <span class="term-en">T0 pulls</span>', correct: true},{t: 'La version <span class="term-en">MLP</span>', correct: false},{t: 'Le plan d\'inspection', correct: false}] },
+    { type: 'order', q: 'Classez dans l\'ordre les actions à effectuer pour une étude après sa création :',
+      items: [{t: '<span class="term-en">Approve</span>'},{t: '<span class="term-en">Start</span>'},{t: '<span class="term-en">Printing Pull label</span>'},{t: '<span class="term-en">Study for storage</span>'},{t: '<span class="term-en">Login T0 sample</span>'},{t: '<span class="term-en">Printing sample label</span>'}] },
+    { type: 'single', q: 'Quelle syntaxe utiliser pour créer une étude pour des <span class="term-en">on-going studies</span> ?',
+      options: [{t: '<span class="term-en">APR</span>', correct: false},{t: '<span class="term-en">A</span>', correct: true},{t: '<span class="term-en">OG</span>', correct: false},{t: '<span class="term-en">O</span>', correct: false}] }
+  ],
+  en: [
+    { type: 'single', q: 'Which option is used to create a study?',
+      options: [{t: '<span class="term-en">Create from scratch</span>', correct: false},{t: '<span class="term-en">Create from template</span>', correct: true}] },
+    { type: 'single', q: 'Which changes do you need to make in your study when creating a study by <span class="term-en">template</span>?',
+      options: [{t: 'The article', correct: false},{t: 'The <span class="term-en">Test group</span> in the <span class="term-en">T0 pulls</span>', correct: true},{t: 'The <span class="term-en">MLP</span> version', correct: false},{t: 'The inspection plan', correct: false}] },
+    { type: 'order', q: 'Put in order the actions to perform on a study after its creation:',
+      items: [{t: '<span class="term-en">Approve</span>'},{t: '<span class="term-en">Start</span>'},{t: '<span class="term-en">Printing Pull label</span>'},{t: '<span class="term-en">Study for storage</span>'},{t: '<span class="term-en">Login T0 sample</span>'},{t: '<span class="term-en">Printing sample label</span>'}] },
+    { type: 'single', q: 'Which syntax do you need to use to create a study for <span class="term-en">on-going studies</span>?',
+      options: [{t: '<span class="term-en">APR</span>', correct: false},{t: '<span class="term-en">A</span>', correct: true},{t: '<span class="term-en">OG</span>', correct: false},{t: '<span class="term-en">O</span>', correct: false}] }
+  ],
+  es: [
+    { type: 'single', q: '¿Qué opción se utiliza para crear un estudio?',
+      options: [{t: '<span class="term-en">Create from scratch</span>', correct: false},{t: '<span class="term-en">Create from template</span>', correct: true}] },
+    { type: 'single', q: '¿Qué cambios debe realizar en su estudio al crearlo mediante un <span class="term-en">template</span>?',
+      options: [{t: 'El artículo', correct: false},{t: 'El <span class="term-en">Test group</span> en los <span class="term-en">T0 pulls</span>', correct: true},{t: 'La versión <span class="term-en">MLP</span>', correct: false},{t: 'El plan de inspección', correct: false}] },
+    { type: 'order', q: 'Ordene las acciones a realizar en un estudio después de su creación:',
+      items: [{t: '<span class="term-en">Approve</span>'},{t: '<span class="term-en">Start</span>'},{t: '<span class="term-en">Printing Pull label</span>'},{t: '<span class="term-en">Study for storage</span>'},{t: '<span class="term-en">Login T0 sample</span>'},{t: '<span class="term-en">Printing sample label</span>'}] },
+    { type: 'single', q: '¿Qué sintaxis debe usar para crear un estudio para <span class="term-en">on-going studies</span>?',
+      options: [{t: '<span class="term-en">APR</span>', correct: false},{t: '<span class="term-en">A</span>', correct: true},{t: '<span class="term-en">OG</span>', correct: false},{t: '<span class="term-en">O</span>', correct: false}] }
+  ],
+  pl: [
+    { type: 'single', q: 'Której opcji używa się do utworzenia badania?',
+      options: [{t: '<span class="term-en">Create from scratch</span>', correct: false},{t: '<span class="term-en">Create from template</span>', correct: true}] },
+    { type: 'single', q: 'Jakie zmiany należy wprowadzić w badaniu podczas jego tworzenia za pomocą <span class="term-en">template</span>?',
+      options: [{t: 'Artykuł', correct: false},{t: '<span class="term-en">Test group</span> w <span class="term-en">T0 pulls</span>', correct: true},{t: 'Wersja <span class="term-en">MLP</span>', correct: false},{t: 'Plan inspekcji', correct: false}] },
+    { type: 'order', q: 'Ułóż w kolejności działania, które należy wykonać w badaniu po jego utworzeniu:',
+      items: [{t: '<span class="term-en">Approve</span>'},{t: '<span class="term-en">Start</span>'},{t: '<span class="term-en">Printing Pull label</span>'},{t: '<span class="term-en">Study for storage</span>'},{t: '<span class="term-en">Login T0 sample</span>'},{t: '<span class="term-en">Printing sample label</span>'}] },
+    { type: 'single', q: 'Jakiej składni należy użyć, aby utworzyć badanie dla <span class="term-en">on-going studies</span>?',
+      options: [{t: '<span class="term-en">APR</span>', correct: false},{t: '<span class="term-en">A</span>', correct: true},{t: '<span class="term-en">OG</span>', correct: false},{t: '<span class="term-en">O</span>', correct: false}] }
+  ],
+  cn: [
+    { type: 'single', q: '使用哪个选项创建一个研究?',
+      options: [{t: '<span class="term-en">Create from scratch</span>', correct: false},{t: '<span class="term-en">Create from template</span>', correct: true}] },
+    { type: 'single', q: '通过 <span class="term-en">template</span> 创建研究时，您需要在研究中进行哪些修改？',
+      options: [{t: '文章', correct: false},{t: '<span class="term-en">T0 pulls</span> 中的 <span class="term-en">Test group</span>', correct: true},{t: '<span class="term-en">MLP</span> 版本', correct: false},{t: '检查计划', correct: false}] },
+    { type: 'order', q: '请按顺序排列研究创建后需要执行的操作：',
+      items: [{t: '<span class="term-en">Approve</span>'},{t: '<span class="term-en">Start</span>'},{t: '<span class="term-en">Printing Pull label</span>'},{t: '<span class="term-en">Study for storage</span>'},{t: '<span class="term-en">Login T0 sample</span>'},{t: '<span class="term-en">Printing sample label</span>'}] },
+    { type: 'single', q: '为 <span class="term-en">on-going studies</span> 创建研究时需要使用哪种语法？',
+      options: [{t: '<span class="term-en">APR</span>', correct: false},{t: '<span class="term-en">A</span>', correct: true},{t: '<span class="term-en">OG</span>', correct: false},{t: '<span class="term-en">O</span>', correct: false}] }
+  ],
+  ar: [
+    { type: 'single', q: 'ما الخيار المستخدم لإنشاء دراسة؟',
+      options: [{t: '<span class="term-en">Create from scratch</span>', correct: false},{t: '<span class="term-en">Create from template</span>', correct: true}] },
+    { type: 'single', q: 'ما التغييرات التي يجب إجراؤها في دراستك عند إنشائها بواسطة <span class="term-en">template</span>؟',
+      options: [{t: 'المقالة', correct: false},{t: '<span class="term-en">Test group</span> في <span class="term-en">T0 pulls</span>', correct: true},{t: 'إصدار <span class="term-en">MLP</span>', correct: false},{t: 'خطة التفتيش', correct: false}] },
+    { type: 'order', q: 'رتب الإجراءات التي يجب تنفيذها على دراسة بعد إنشائها:',
+      items: [{t: '<span class="term-en">Approve</span>'},{t: '<span class="term-en">Start</span>'},{t: '<span class="term-en">Printing Pull label</span>'},{t: '<span class="term-en">Study for storage</span>'},{t: '<span class="term-en">Login T0 sample</span>'},{t: '<span class="term-en">Printing sample label</span>'}] },
+    { type: 'single', q: 'ما الصيغة التي يجب استخدامها لإنشاء دراسة لـ <span class="term-en">on-going studies</span>؟',
+      options: [{t: '<span class="term-en">APR</span>', correct: false},{t: '<span class="term-en">A</span>', correct: true},{t: '<span class="term-en">OG</span>', correct: false},{t: '<span class="term-en">O</span>', correct: false}] }
+  ]
+};
+
+// ===== Active language state (default FR) =====
+let currentLang = 'fr';
+let VIDEOS = VIDEOS_META[currentLang].map((v, i) => ({...v, id: i+1, num: String(i+1).padStart(2, '0')}));
+let QUIZ = QUIZ_I18N[currentLang];
+
+// ===== Helper: t() retrieves a translation key with optional placeholders =====
+function t(key, replacements = {}) {
+  let str = I18N[currentLang][key] || I18N.fr[key] || key;
+  Object.keys(replacements).forEach(k => {
+    str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), replacements[k]);
+  });
+  return str;
+}
+
+let state = {
+  currentStep: 0, // 0..7 = videos, 8 = quiz
+  completed: new Set(),
+  quizCurrent: 0,
+  quizAnswers: {}, // { qIndex: [selectedIdxs] OR ['orderArr'] }
+  quizShuffleOrder: []
+};
+
+// ===== SIDEBAR RENDER =====
+function renderSidebar() {
+  const list = document.getElementById('navList');
+  const allVideosCompleted = VIDEOS.every((_, i) => state.completed.has(i));
+  const quizLocked = !allVideosCompleted;
+  const remaining = VIDEOS.length - state.completed.size;
+  
+  list.innerHTML = VIDEOS.map((v, i) => `
+    <li class="nav-item ${i === state.currentStep && !isQuizStep() ? 'active' : ''} ${state.completed.has(i) ? 'completed' : ''}"
+        onclick="goToStep(${i})">
+      <div class="nav-check"></div>
+      <div class="nav-content">
+        <div class="nav-num">${t('nav_video_label')} ${v.num} · ${v.tag}</div>
+        <div class="nav-title">${v.title}</div>
+      </div>
+    </li>
+  `).join('') + `
+    <li class="nav-item quiz ${isQuizStep() ? 'active' : ''} ${state.completed.has(8) ? 'completed' : ''} ${quizLocked ? 'locked' : ''}"
+        onclick="${quizLocked ? 'showQuizLockedMessage()' : 'goToStep(8)'}">
+      <div class="nav-check">${quizLocked ? '<svg width="11" height="13" viewBox="0 0 11 13" fill="none"><path d="M2 5.5V3.5C2 1.84 3.34 0.5 5 0.5C6.66 0.5 8 1.84 8 3.5V5.5M1 5.5H9C9.55 5.5 10 5.95 10 6.5V11.5C10 12.05 9.55 12.5 9 12.5H1C0.45 12.5 0 12.05 0 11.5V6.5C0 5.95 0.45 5.5 1 5.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</div>
+      <div class="nav-content">
+        <div class="nav-num">${quizLocked ? t('nav_quiz_locked') : t('nav_quiz_label')}</div>
+        <div class="nav-title">${quizLocked ? t('nav_quiz_meta_locked', {n: remaining}) : t('nav_quiz_meta')}</div>
+      </div>
+    </li>
+  `;
+
+  const total = VIDEOS.length + 1;
+  const done = state.completed.size;
+  document.getElementById('progressBar').style.width = (done / total * 100) + '%';
+  document.getElementById('progressLabel').textContent = t('progress_label', {n: done, total: total});
+}
+
+function showQuizLockedMessage() {
+  const remaining = VIDEOS.length - state.completed.size;
+  alert(t('quiz_locked_alert', {n: remaining}));
+}
+
+function isQuizStep() { return state.currentStep === 8; }
+
+// ===== NAVIGATION =====
+function goToStep(i) {
+  state.currentStep = i;
+  hideAll();
+  if (i === 8) {
+    document.getElementById('quizIntroView').classList.remove('hidden');
+  } else {
+    showVideoView();
+  }
+  renderSidebar();
+  closeSidebarMobile();
+}
+
+function showVideoView() {
+  document.getElementById('videoView').classList.remove('hidden');
+  // Garde-fou si étape supérieure au nb de vidéos (cas du quiz)
+  if (state.currentStep >= VIDEOS.length) return;
+  const v = VIDEOS[state.currentStep];
+  document.getElementById('videoTitle').textContent = v.title;
+  document.getElementById('videoDesc').textContent = v.desc;
+  document.getElementById('crumbStep').textContent = t('step_label', {n: state.currentStep + 1, total: VIDEOS.length + 1});
+  // Charger la vidéo dans l'iframe
+  const iframe = document.getElementById('videoFrame');
+  if (iframe && v.url) {
+    iframe.src = v.url;
+  }
+  // Cacher "Étape précédente" sur la première vidéo
+  document.getElementById('prevStepBtn').style.visibility = state.currentStep === 0 ? 'hidden' : 'visible';
+}
+
+function hideAll() {
+  ['videoView', 'confirmView', 'quizIntroView', 'quizView', 'resultView'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+}
+
+function prevStep() {
+  if (state.currentStep > 0) goToStep(state.currentStep - 1);
+}
+
+function nextStep() {
+  const nextIdx = state.currentStep + 1;
+  // Si on essaye d'aller au quiz, vérifier que toutes les vidéos sont vues
+  if (nextIdx === VIDEOS.length) {
+    const allVideosCompleted = VIDEOS.every((_, i) => state.completed.has(i));
+    if (!allVideosCompleted) {
+      // Aller à la prochaine vidéo non vue à la place
+      const nextUnseenIdx = VIDEOS.findIndex((_, i) => !state.completed.has(i));
+      if (nextUnseenIdx !== -1) {
+        goToStep(nextUnseenIdx);
+        return;
+      }
+    }
+  }
+  if (state.currentStep < VIDEOS.length) goToStep(nextIdx);
+}
+
+function goToConfirm() {
+  hideAll();
+  document.getElementById('confirmView').classList.remove('hidden');
+  // Mark current as completed
+  state.completed.add(state.currentStep);
+  renderSidebar();
+}
+
+function rewatchVideo() {
+  hideAll();
+  showVideoView();
+}
+
+function simulateWatch() {
+  // demo : just visual feedback
+}
+
+// ===== QUIZ =====
+function shuffleArray(a) {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function startQuiz() {
+  state.quizCurrent = 0;
+  state.quizAnswers = {};
+  // shuffle questions order (in real prod = all 20)
+  state.quizShuffleOrder = shuffleArray([...Array(QUIZ.length).keys()]);
+  hideAll();
+  document.getElementById('quizView').classList.remove('hidden');
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const realIdx = state.quizShuffleOrder[state.quizCurrent];
+  const q = QUIZ[realIdx];
+  const total = state.quizShuffleOrder.length;
+
+  document.getElementById('quizCounter').textContent = t('quiz_counter', {n: state.quizCurrent + 1, total: total});
+  document.getElementById('quizProgressFill').style.width = ((state.quizCurrent + 1) / total * 100) + '%';
+  document.getElementById('quizQuestion').innerHTML = q.q;
+
+  const typeLabel = { single: t('type_single'), multi: t('type_multi'), order: t('type_order') };
+  document.getElementById('quizTypeHint').textContent = typeLabel[q.type];
+
+  const content = document.getElementById('quizContent');
+
+  if (q.type === 'single' || q.type === 'multi') {
+    const shuffledOpts = shuffleArray(q.options.map((o, i) => ({ ...o, originalIdx: i })));
+    const stored = state.quizAnswers[realIdx] || [];
+    content.innerHTML = `<div class="quiz-options">` + shuffledOpts.map(o => `
+      <div class="quiz-option ${stored.includes(o.originalIdx) ? 'selected' : ''}" 
+           data-multi="${q.type === 'multi'}"
+           data-idx="${o.originalIdx}"
+           onclick="toggleOption(${realIdx}, ${o.originalIdx}, '${q.type}')">
+        <div class="quiz-option-mark"></div>
+        <div class="quiz-option-text">${o.t}</div>
+      </div>
+    `).join('') + `</div>`;
+  } else if (q.type === 'order') {
+    const stored = state.quizAnswers[realIdx];
+    const items = stored ? stored.map(idx => q.items[idx]) : shuffleArray(q.items);
+    content.innerHTML = `<div class="quiz-dnd" id="dndZone">` + items.map((it, idx) => `
+      <div class="dnd-item" draggable="true" data-original="${q.items.indexOf(it)}">
+        <div class="dnd-handle">⋮⋮</div>
+        <div class="dnd-num">${idx + 1}</div>
+        <div class="dnd-text">${it.t}</div>
+      </div>
+    `).join('') + `</div>`;
+    setupDnD(realIdx);
+  }
+
+  // Nav buttons state
+  document.getElementById('quizPrevBtn').style.visibility = state.quizCurrent === 0 ? 'hidden' : 'visible';
+  document.getElementById('quizNextBtn').textContent = state.quizCurrent === total - 1 ? t('btn_finish_quiz') : t('btn_quiz_next');
+}
+
+function toggleOption(qIdx, optIdx, type) {
+  if (!state.quizAnswers[qIdx]) state.quizAnswers[qIdx] = [];
+  if (type === 'single') {
+    state.quizAnswers[qIdx] = [optIdx];
+  } else {
+    const i = state.quizAnswers[qIdx].indexOf(optIdx);
+    if (i >= 0) state.quizAnswers[qIdx].splice(i, 1);
+    else state.quizAnswers[qIdx].push(optIdx);
+  }
+  renderQuizQuestion();
+}
+
+function setupDnD(realIdx) {
+  const zone = document.getElementById('dndZone');
+  let dragged = null;
+
+  zone.querySelectorAll('.dnd-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragged = item;
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      zone.querySelectorAll('.dnd-item').forEach(i => i.classList.remove('drag-over'));
+      // save current order
+      const newOrder = [...zone.querySelectorAll('.dnd-item')].map(el => parseInt(el.dataset.original));
+      state.quizAnswers[realIdx] = newOrder;
+      // re-render numbers
+      [...zone.querySelectorAll('.dnd-item')].forEach((el, i) => el.querySelector('.dnd-num').textContent = i + 1);
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (!dragged || item === dragged) return;
+      const rect = item.getBoundingClientRect();
+      const after = (e.clientY - rect.top) > rect.height / 2;
+      if (after) item.parentNode.insertBefore(dragged, item.nextSibling);
+      else item.parentNode.insertBefore(dragged, item);
+    });
+  });
+}
+
+function quizPrev() {
+  if (state.quizCurrent > 0) {
+    state.quizCurrent--;
+    renderQuizQuestion();
+  }
+}
+
+function quizNext() {
+  if (state.quizCurrent < state.quizShuffleOrder.length - 1) {
+    state.quizCurrent++;
+    renderQuizQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+function finishQuiz() {
+  let correct = 0;
+  state.quizShuffleOrder.forEach(realIdx => {
+    const q = QUIZ[realIdx];
+    const ans = state.quizAnswers[realIdx];
+    if (!ans) return;
+    if (q.type === 'single' || q.type === 'multi') {
+      const correctIdxs = q.options.map((o, i) => o.correct ? i : null).filter(x => x !== null).sort();
+      const userIdxs = [...ans].sort();
+      if (JSON.stringify(correctIdxs) === JSON.stringify(userIdxs)) correct++;
+    } else if (q.type === 'order') {
+      const correctOrder = q.items.map((_, i) => i);
+      if (JSON.stringify(ans) === JSON.stringify(correctOrder)) correct++;
+    }
+  });
+
+  const total = state.quizShuffleOrder.length;
+  const pct = Math.round(correct / total * 100);
+  const passed = pct >= 80;
+
+  hideAll();
+  document.getElementById('resultView').classList.remove('hidden');
+  document.getElementById('resultScore').textContent = pct + '%';
+  document.getElementById('resultLabel').textContent = t('result_correct', {n: correct, total: total});
+
+  const status = document.getElementById('resultStatus');
+  status.textContent = passed ? t('result_pass_status') : t('result_fail_status');
+  status.className = 'result-status ' + (passed ? 'success' : 'fail');
+
+  document.getElementById('resultTitle').textContent = passed ? t('result_pass_title') : t('result_fail_title');
+  document.getElementById('resultText').textContent = passed ? t('result_pass_text') : t('result_fail_text');
+
+  document.getElementById('retryBtn').style.display = passed ? 'none' : 'inline-flex';
+
+  if (passed) state.completed.add(8);
+  renderSidebar();
+}
+
+function retryQuiz() { startQuiz(); }
+function goBackHome() { goToStep(0); }
+
+// ===== MOBILE =====
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function closeSidebarMobile() {
+  if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
+}
+
+// ===== LANG SWITCH (full i18n) =====
+function applyLanguage(lang) {
+  if (!I18N[lang]) return;
+  currentLang = lang;
+  
+  // Update VIDEOS data with translated metadata
+  VIDEOS = VIDEOS_META[lang].map((v, i) => ({...v, id: i+1, num: String(i+1).padStart(2, '0')}));
+  // Update QUIZ data with translated questions
+  QUIZ = QUIZ_I18N[lang];
+  
+  // Apply RTL/LTR
+  document.body.setAttribute('dir', I18N[lang].direction);
+  document.body.classList.toggle('rtl', I18N[lang].direction === 'rtl');
+  
+  // Update static UI labels
+  document.getElementById('brandSubtitle').textContent = t('brand_subtitle');
+  document.getElementById('moduleTitle').textContent = t('module_title');
+  document.getElementById('moduleSub').textContent = t('module_sub');
+  document.getElementById('navSectionTitle').textContent = t('nav_section');
+  document.getElementById('crumbModule').textContent = t('crumb_module');
+  document.getElementById('crumbModule2').textContent = t('crumb_module');
+  document.getElementById('quizCrumb').textContent = t('quiz_crumb');
+  document.getElementById('prevStepBtn').textContent = t('btn_prev');
+  document.getElementById('watchedBtn').textContent = t('btn_watched');
+  document.getElementById('confirmTitle').textContent = t('confirm_title');
+  document.getElementById('confirmText').textContent = t('confirm_text');
+  document.getElementById('rewatchBtn').textContent = t('btn_rewatch');
+  document.getElementById('nextStepBtn').textContent = t('btn_next');
+  document.getElementById('quizTag').textContent = t('quiz_tag');
+  document.getElementById('quizIntroTitle').textContent = t('quiz_intro_title');
+  document.getElementById('quizIntroText').innerHTML = t('quiz_intro_text');
+  document.getElementById('statQuestions').textContent = t('stat_questions');
+  document.getElementById('statThreshold').textContent = t('stat_threshold');
+  document.getElementById('statAttempts').textContent = t('stat_attempts');
+  document.getElementById('startQuizBtn').textContent = t('btn_start_quiz');
+  document.getElementById('quizPrevBtn').textContent = t('btn_quiz_prev');
+  document.getElementById('quizNextBtn').textContent = t('btn_quiz_next');
+  document.getElementById('backHomeBtn').textContent = t('btn_back_home');
+  document.getElementById('retryBtn').textContent = t('btn_retry');
+  
+  // Re-render dynamic sections
+  renderSidebar();
+  
+  // If currently on a video view, refresh the video metadata + URL
+  if (state.currentStep < VIDEOS.length) {
+    showVideoView();
+  }
+  // If on quiz view, re-render current question
+  if (document.getElementById('quizView') && !document.getElementById('quizView').classList.contains('hidden')) {
+    renderQuizQuestion();
+  }
+  
+  // Update current language label in sidebar
+  const langLabels = { fr: 'Français', en: 'English', es: 'Español', pl: 'Polski', cn: '中文', ar: 'العربية' };
+  const labelEl = document.getElementById('currentLangLabel');
+  if (labelEl) labelEl.textContent = langLabels[lang] || lang.toUpperCase();
+}
+
+// ===== LANGUAGE SPLASH =====
+function selectLanguage(lang) {
+  applyLanguage(lang);
+  const splash = document.getElementById('langSplash');
+  splash.classList.add('fade-out');
+  setTimeout(() => {
+    splash.style.display = 'none';
+    document.getElementById('appWrapper').style.display = 'grid';
+    showVideoView();
+  }, 400);
+}
+
+function reopenLanguageSplash() {
+  const splash = document.getElementById('langSplash');
+  splash.classList.remove('fade-out');
+  splash.style.display = 'grid';
+  splash.style.visibility = 'visible';
+  splash.style.opacity = '1';
+  document.getElementById('appWrapper').style.display = 'none';
+  closeSidebarMobile();
+}
+
+// ===== INIT =====
+// Le splash est affiché par défaut, on initialise les data en FR pour le cas où
+applyLanguage('fr');
+// Mais on cache l'app et on attend que l'utilisateur choisisse une langue
+document.getElementById('appWrapper').style.display = 'none';
+</script>
+</body>
+</html>
